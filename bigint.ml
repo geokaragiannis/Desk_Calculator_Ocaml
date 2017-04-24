@@ -45,6 +45,30 @@ module Bigint = struct
                    in  strcat ""
                        ((if sign = Pos then "" else "-") ::
                         (map string_of_int reversed))
+
+   let rec compare_helper rev1 rev2 =  
+      match (rev1, rev2) with
+      | [], [] -> 0
+      | car1::cdr1, car2::cdr2 -> if car1 > car2 then 1
+                                  else if car2 > car1 then -1
+                                  else compare_helper cdr1 cdr2
+   
+   (*
+    * compare_big compares value1 and value2:
+    * if value1 > value2, return 1
+    * if value1 < value2, return -1
+    * if value1 = value2, return 0
+    ********* right now it takes two bigints as arguments, this is 
+    *******just for testing. IN the future, it should take value1,value2
+   *)
+   let compare_big (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
+      let len1 = List.length value1 in
+         let len2 = List.length value2 in
+            if len1 > len2 then 1
+            else if len1 < len2 then -1
+            else let rev1 = reverse value1 in
+                 let rev2 = reverse value2 in
+                   compare_helper rev1 rev2
 
     let rec add' list1 list2 carry = match (list1, list2, carry) with
         | list1, [], 0       -> list1
