@@ -16,6 +16,10 @@ let strsub = String.sub
 let ord thechar = int_of_char thechar
 type binop_t = bigint -> bigint -> bigint
 
+(*
+ * Print helper function that prints a number digit by digit.
+ * Prints at most 70 digit per line, followed by a backslash.
+ *)
 let rec print_number_helper str count =
    if (strlen str) = 0 then printf "\n%!"
    else if count = 70 then
@@ -29,9 +33,7 @@ let rec print_number_helper str count =
          print_number_helper (strsub str 1 ((strlen str)-1)) (count + 1)
       end
    
-
 let print_number number=print_number_helper (string_of_bigint number) 0
-(*printf "%s\n%!" (string_of_bigint number)*)
 
 let print_stackempty () = printf "stack empty\n%!"
 
