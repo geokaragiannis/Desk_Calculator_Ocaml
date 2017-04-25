@@ -18,6 +18,17 @@ module Bigint = struct
     let strsub    = String.sub
     let zero      = Bigint (Pos, [])
 
+   let canon lst = 
+      let rec canon' lst' = match lst' with
+         | []  -> []
+         | [0] -> []
+         | car::cdr ->
+            let cdr' = canon' cdr
+            in match car, cdr' with
+               | 0, [] -> []
+               | car, cdr' -> car::cdr'
+      in canon' lst
+
     let charlist_of_string str = 
         let last = strlen str - 1
         in  let rec charlist pos result =
@@ -25,6 +36,7 @@ module Bigint = struct
             then result
             else charlist (pos - 1) (str.[pos] :: result)
         in  charlist last []
+
 
     let bigint_of_string str =
         let len = strlen str
@@ -35,8 +47,8 @@ module Bigint = struct
             in  if   len = 0
                 then zero
                 else if   str.[0] = '_'
-                     then Bigint (Neg, to_intlist 1)
-                     else Bigint (Pos, to_intlist 0)
+                     then Bigint (Neg, canon (to_intlist 1))
+                     else Bigint (Pos, canon (to_intlist 0))
 
     let string_of_bigint (Bigint (sign, value)) =
         match value with
