@@ -18,6 +18,10 @@ module Bigint = struct
     let strsub    = String.sub
     let zero      = Bigint (Pos, [])
 
+   (*
+    * canon canonicalizes the value of a bigint by removing the
+    * the higher order zeros
+    *)
    let canon lst = 
       let rec canon' lst' = match lst' with
          | []  -> []
@@ -58,9 +62,16 @@ module Bigint = struct
                        ((if sign = Pos then "" else "-") ::
                         (map string_of_int reversed))
 
+   (*
+    * compares the magnitude of two numbers which are 
+    * passed with the head as the highest order bit
+    *** rev1 and rev2 must be of the same length***
+    *)
    let rec compare_helper rev1 rev2 =  
       match (rev1, rev2) with
       | [], [] -> 0
+      | [], _  -> raise (Invalid_argument "compare helper")
+      | _, []  -> raise (Invalid_argument "compare helper")
       | car1::cdr1, car2::cdr2 -> if car1 > car2 then 1
                                   else if car2 > car1 then -1
                                   else compare_helper cdr1 cdr2
@@ -72,7 +83,7 @@ module Bigint = struct
     * if value1 = value2, return 0
     ********* right now it takes two bigints as arguments, this is 
     *******just for testing. IN the future, it should take value1,value2
-   *)
+    *)
    let compare_big (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
       let len1 = List.length value1 in
          let len2 = List.length value2 in
