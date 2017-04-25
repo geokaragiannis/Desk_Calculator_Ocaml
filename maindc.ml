@@ -10,11 +10,28 @@ open Scanner
 type stack_t = Bigint.bigint Stack.t
 let push = Stack.push
 let pop = Stack.pop
+let strlen = String.length
+let strsub = String.sub
 
 let ord thechar = int_of_char thechar
 type binop_t = bigint -> bigint -> bigint
 
-let print_number number = printf "%s\n%!" (string_of_bigint number)
+let rec print_number_helper str count =
+   if (strlen str) = 0 then printf "\n%!"
+   else if count = 70 then
+      begin
+         printf "\\ \n";
+         print_number_helper str 0   
+      end
+   else 
+      begin
+         printf "%c" (String.get str 0);
+         print_number_helper (strsub str 1 ((strlen str)-1)) (count + 1)
+      end
+   
+
+let print_number number=print_number_helper (string_of_bigint number) 0
+(*printf "%s\n%!" (string_of_bigint number)*)
 
 let print_stackempty () = printf "stack empty\n%!"
 
