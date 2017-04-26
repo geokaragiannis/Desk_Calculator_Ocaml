@@ -18,6 +18,7 @@ module Bigint = struct
     let strsub    = String.sub
     let zero      = Bigint (Pos, [])
 
+
    (*
     * canon canonicalizes the value of a bigint by removing the
     * the higher order zeros
@@ -107,17 +108,38 @@ module Bigint = struct
     *)
    let rec sub' list1 list2 borrow = match (list1, list2, borrow) with
       | list1, [], 0 -> list1
-      | [], list2, 0 -> raise (Invalid_argument "sub")
+      | [], list2, 0 -> raise (Invalid_argument "sub'")
       | list1, [], borrow -> sub' list1 [borrow] 0
-      | [], list2, borrow -> raise (Invalid_argument "sub")
+      | [], list2, borrow -> raise (Invalid_argument "sub'")
       | car1::cdr1, car2::cdr2, borrow ->
         let diff = car1 - car2 - borrow
         in if diff >= 0 then diff :: sub' cdr1 cdr2 0
            else (diff + 10) :: sub' cdr1 cdr2 1
 
-    let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
+    let double number = add' number number 0
+
+    let rec mul' (multiplier, powerof2, multiplicand') = 
+        if (compare_big  powerof2 multiplier) = 1 then multiplier, [0]
+        else let remainder, product = 
+            mul' (multiplier, (double powerof2), (double multiplicand'))
+            in if (compare_big remainder powerof2) = -1
+               then remainder, product
+               else  (canon (sub' remainder powerof2 0)), (add' product multiplicand' 0)
+
+    let rec divrem' (dividend, powerof2, divisor') =
+        if (compare_big divisor' dividend) = 1 
+            then [0], dividend
+        else let quotient, remainder =
+                 divrem' (dividend, (double powerof2), (double divisor'))
+             in if (compare_big remainder divisor') = -1
+                    then quotient, remainder
+                else (add' quotient powerof2 0), (canon (sub' remainder divisor' 0))
+
+    let divrem (dividend, divisor') = divrem' (dividend, [1], divisor') 
+
+    let add (Bigint(neg1, value1)) (Bigint(neg2, value2)) =
         if neg1 = neg2
-        then Bigint (neg1, add' value1 value2 0)
+        then Bigint(neg1, add' value1 value2 0)
         else
             let result = compare_big value1 value2 in
                if result = 0 then zero
@@ -126,7 +148,7 @@ module Bigint = struct
                     then Bigint(neg1, canon (sub' value1 value2 0))
                else Bigint(neg2, canon (sub' value2 value1 0))
             
-    let sub (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
+    let sub (Bigint(neg1, value1)) (Bigint(neg2, value2)) =
       if neg1 <> neg2 then
          if neg2 = Neg then Bigint(Pos, add' value1 value2 0)
          else Bigint(Neg, add' value1 value2 0)
@@ -143,11 +165,25 @@ module Bigint = struct
                Bigint(Pos, canon(sub' value2 value1 0))
             else zero          
 
-    let mul = add
+    let mul (Bigint (neg1,value1)) (Bigint(neg2, value2)) = 
+        let _, product = mul' (value1, [1], value2)
+        in if neg1 == neg2 then Bigint(Pos, product)
+           else Bigint(Neg, product)
 
-    let div = add
+    let div (Bigint (neg1,value1)) (Bigint(neg2, value2)) = 
+        let quotient,_ = divrem (value1, value2)
+        in if neg1 == neg2 then Bigint(Pos, quotient)
+           else Bigint(Neg, quotient)
 
-    let rem = add
+
+    let rem (Bigint (neg1,value1)) (Bigint(neg2, value2)) =
+        let _, remainder = divrem (value1, value2)
+        in match (neg1, neg2) with
+            |Pos, Pos -> Bigint(Pos, remainder)
+            |Neg, Neg -> Bigint(Neg, remainder)
+            |Neg, Pos -> Bigint(Neg, remainder)
+            |Pos, Neg -> Bigint(Pos, remainder)
+         
 
     let pow = add
 
