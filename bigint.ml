@@ -84,7 +84,7 @@ module Bigint = struct
     ********* right now it takes two bigints as arguments, this is 
     *******just for testing. IN the future, it should take value1,value2
     *)
-   let compare_big (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
+   let compare_big value1 value2 =
       let len1 = List.length value1 in
          let len2 = List.length value2 in
             if len1 > len2 then 1
@@ -102,12 +102,46 @@ module Bigint = struct
           let sum = car1 + car2 + carry
           in  sum mod radix :: add' cdr1 cdr2 (sum / radix)
 
+   (*
+    * value1 must be greater than value2
+    *)
+   let rec sub' list1 list2 borrow = match (list1, list2, borrow) with
+      | list1, [], 0 -> list1
+      | [], list2, 0 -> raise (Invalid_argument "sub")
+      | list1, [], borrow -> sub' list1 [borrow] 0
+      | [], list2, borrow -> raise (Invalid_argument "sub")
+      | car1::cdr1, car2::cdr2, borrow ->
+        let diff = car1 - car2 - borrow
+        in if diff >= 0 then diff :: sub' cdr1 cdr2 0
+           else (diff + 10) :: sub' cdr1 cdr2 1
+
     let add (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
         if neg1 = neg2
         then Bigint (neg1, add' value1 value2 0)
-        else zero
-
-    let sub = add
+        else
+            let result = compare_big value1 value2 in
+               if result = 0 then zero
+               (*change later *)
+               else if result = 1 
+                    then Bigint(neg1, canon (sub' value1 value2 0))
+               else Bigint(neg2, canon (sub' value2 value1 0))
+            
+    let sub (Bigint (neg1, value1)) (Bigint (neg2, value2)) =
+      if neg1 <> neg2 then
+         if neg2 = Neg then Bigint(Pos, add' value1 value2 0)
+         else Bigint(Neg, add' value1 value2 0)
+      else
+         let result = compare_big value1 value2 in
+         if neg1 = Pos then
+            if result = 1 then Bigint(Pos, canon(sub' value1 value2 0))
+            else if result = -1 then 
+               Bigint(Neg, canon(sub' value2 value1 0))
+            else zero
+         else
+            if result = 1 then Bigint(Neg, canon(sub' value1 value2 0))
+            else if result = -1 then
+               Bigint(Pos, canon(sub' value2 value1 0))
+            else zero          
 
     let mul = add
 

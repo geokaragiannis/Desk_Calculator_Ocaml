@@ -22,7 +22,7 @@ type binop_t = bigint -> bigint -> bigint
  *)
 let rec print_number_helper str count =
    if (strlen str) = 0 then printf "\n%!"
-   else if count = 70 then
+   else if count = 69 then
       begin
          printf "\\ \n";
          print_number_helper str 0   

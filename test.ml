@@ -1,5 +1,5 @@
 #use "bigint.ml";;
 open Bigint;;
-let foo = bigint_of_string "_12123123123131231241687318768712638716238761872361287361238768712638712361874618736";;
-let bar = bigint_of_string "12123123123131231241687318768712638716238761872361287361238768712638712361873618736";;
-compare_big foo bar;;
+let foo = bigint_of_string "_325";;
+let bar = bigint_of_string "_325";;
+string_of_bigint (sub foo bar);;
