@@ -124,25 +124,31 @@ module Bigint = struct
             mul' (multiplier, (double powerof2), (double multiplicand'))
             in if (compare_big remainder powerof2) = -1
                then remainder, product
-               else  (canon (sub' remainder powerof2 0)), (add' product multiplicand' 0)
+               else  (canon (sub' remainder powerof2 0)),
+                           (add' product multiplicand' 0)
 
     let rec divrem' (dividend, powerof2, divisor') =
         if (compare_big divisor' dividend) = 1 
             then [0], dividend
         else let quotient, remainder =
-                 divrem' (dividend, (double powerof2), (double divisor'))
+                 divrem' (dividend, (double powerof2), 
+                          (double divisor'))
              in if (compare_big remainder divisor') = -1
                     then quotient, remainder
-                else (add' quotient powerof2 0), (canon (sub' remainder divisor' 0))
+                else (add' quotient powerof2 0), 
+                           (canon (sub' remainder divisor' 0))
 
     let divrem (dividend, divisor') = divrem' (dividend, [1], divisor')
 
-    let even number = if number = [] then true else (car number) mod 2 = 0
+    let even number = if number = [] 
+                      then true else (car number) mod 2 = 0
 
     let rec power' (base, expt, result) = match expt with
-        | []                    -> result
-        | expt when even expt   -> power' (snd (mul' (base, [1], base)), fst (divrem (expt, [2])), result)
-        | expt                  -> power' (base, canon (sub' expt [1] 0), snd (mul' (base, [1], result)))
+        | []                   -> result
+        | expt when even expt  -> power' (snd (mul' (base, [1], base)),
+                                       fst (divrem (expt, [2])), result)
+        | expt                 -> power' (base, canon (sub' expt [1] 0),
+                                       snd (mul' (base, [1], result)))
 
     let add (Bigint(neg1, value1)) (Bigint(neg2, value2)) =
         if neg1 = neg2

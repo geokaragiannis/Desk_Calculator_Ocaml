@@ -30,7 +30,7 @@ let rec print_number_helper str count =
    if (strlen str) = 0 then printf "\n%!"
    else if count = 69 then
       begin
-         printf "\\ \n";
+         printf "\\\n";
          print_number_helper str 0   
       end
    else 
@@ -41,7 +41,7 @@ let rec print_number_helper str count =
    
 let print_number number=print_number_helper (string_of_bigint number) 0
 
-let print_stackempty () = printf "stack empty\n%!"
+let print_stackempty () = printf "dc: stack empty\n%!"
 
 let executereg (thestack: stack_t) (oper: char) (reg: int) =
     try match oper with
@@ -88,7 +88,7 @@ let toploop (thestack: stack_t) inputchannel =
                  | Operator oper       -> execute thestack oper
                  );
              toploop ()
-        with End_of_file -> printf "End_of_file\n%!";
+        with End_of_file -> exit 0;
     in  toploop ()
 
 let readfiles () =
