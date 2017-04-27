@@ -16,6 +16,12 @@ let strsub = String.sub
 let ord thechar = int_of_char thechar
 type binop_t = bigint -> bigint -> bigint
 
+let regs : (int, Bigint.bigint) Hashtbl.t = Hashtbl.create 256
+(* First arg is the key (int) and the second the value (Bigint) *)
+let add_reg = Hashtbl.replace regs
+(* Takes an int as an arg and returns a Bigint *)
+let get_reg =  Hashtbl.find regs
+
 (*
  * Print helper function that prints a number digit by digit.
  * Prints at most 70 digit per line, followed by a backslash.
@@ -39,8 +45,8 @@ let print_stackempty () = printf "stack empty\n%!"
 
 let executereg (thestack: stack_t) (oper: char) (reg: int) =
     try match oper with
-        | 'l' -> printf "operator l reg 0%o is unimplemented\n%!" reg
-        | 's' -> printf "operator s reg 0%o is unimplemented\n%!" reg
+        | 's' -> let stk = (pop thestack) in add_reg reg stk
+        | 'l' -> push (get_reg reg) thestack
         | _   -> printf "0%o 0%o is unimplemented\n%!" (ord oper) reg
     with Stack.Empty -> print_stackempty()
 
