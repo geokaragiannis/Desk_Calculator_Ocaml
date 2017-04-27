@@ -135,7 +135,14 @@ module Bigint = struct
                     then quotient, remainder
                 else (add' quotient powerof2 0), (canon (sub' remainder divisor' 0))
 
-    let divrem (dividend, divisor') = divrem' (dividend, [1], divisor') 
+    let divrem (dividend, divisor') = divrem' (dividend, [1], divisor')
+
+    let even number = if number = [] then true else (car number) mod 2 = 0
+
+    let rec power' (base, expt, result) = match expt with
+        | []                    -> result
+        | expt when even expt   -> power' (snd (mul' (base, [1], base)), fst (divrem (expt, [2])), result)
+        | expt                  -> power' (base, canon (sub' expt [1] 0), snd (mul' (base, [1], result)))
 
     let add (Bigint(neg1, value1)) (Bigint(neg2, value2)) =
         if neg1 = neg2
@@ -185,7 +192,13 @@ module Bigint = struct
             |Pos, Neg -> Bigint(Pos, remainder)
          
 
-    let pow = add
+    let pow (Bigint (neg1,value1)) (Bigint(neg2, value2)) =
+        if neg2 = Neg then zero
+        else let result = power' (value1, value2, [1]) in
+            if neg1 = Pos then Bigint(Pos, result)
+            else 
+                if even value2 then Bigint(Pos, result)
+                else Bigint(Neg, result)
 
 end
 
